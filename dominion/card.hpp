@@ -16,6 +16,9 @@ using namespace std;
 struct BoardState;
 
 struct Card {
+    Card() : name(""), cost(0), type(set<string>()) {}
+    Card(string init_name, int init_cost, set<string> init_type) : name(init_name), cost(init_cost), type(init_type) {}
+    
     string name;
     int cost;
     set<string> type;
@@ -34,38 +37,56 @@ struct Card {
 };
 
 struct Estate : Card {
+    Estate() : Card("estate", 2, {"victory"}) {}
+    
     void onGameEnd(BoardState* board_state);
 };
 
 struct Duchy : Card {
+    Duchy() : Card("duchy", 5, {"victory"}) {}
+    
     void onGameEnd(BoardState* board_state);
 };
 
 struct Province : Card {
+    Province() : Card("province", 8, {"victory"}) {}
+    
     void onGameEnd(BoardState* board_state);
 };
 
 struct Copper : Card {
+    Copper() : Card("copper", 0, {"treasure"}) {}
+    
     void onPlay(BoardState* board_state);
 };
 
 struct Silver : Card {
+    Silver() : Card("silver", 3, {"treasure"}) {}
+    
     void onPlay(BoardState* board_state);
 };
 
 struct Gold : Card {
+    Gold() : Card("gold", 6, {"treasure"}) {}
+    
     void onPlay(BoardState* board_state);
 };
 
 struct Curse : Card {
+    Curse() : Card("curse", 0, {"curse"}) {}
+    
     void onGameEnd(BoardState* board_state);
 };
 
 struct Laboratory : Card {
+    Laboratory() : Card("laboratory", 5, {"action"}) {}
+    
     void onPlay(BoardState* board_state);
 };
 
 struct Village : Card {
+    Village() : Card("village", 3, {"action"}) {}
+    
     void onPlay(BoardState* board_state);
 };
 

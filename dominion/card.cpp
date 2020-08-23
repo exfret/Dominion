@@ -22,15 +22,15 @@ void Province::onGameEnd(BoardState* board_state) {
 }
 
 void Copper::onPlay(BoardState* board_state) {
-    board_state->
+    board_state->addTreasure(1);
 }
 
 void Silver::onPlay(BoardState* board_state) {
-    
+    board_state->addTreasure(2);
 }
 
 void Gold::onPlay(BoardState* board_state) {
-    
+    board_state->addTreasure(3);
 }
 
 void Curse::onGameEnd(BoardState* board_state) {
