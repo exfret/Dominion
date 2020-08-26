@@ -107,6 +107,7 @@ struct BoardState {
     void initializeBoard();
     
     // Some helper functions to access the current player's member variables faster
+    // TODO: Maybe clean up some of these that I don't need
     PlayerState* getCurrPlayerState();
     Pile* getCurrInPlay();
     Pile* getCurrInHand();

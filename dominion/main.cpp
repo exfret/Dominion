@@ -14,9 +14,12 @@
      DONE B: Make a function for buying cards
      DONE C: Make a function for playing cards
      D: Test for victory conditions
-   2) Make interface for interacting with game
+   DONE 2) Make interface for interacting with game
    DONE 3) Add types and names for cards
-   4) M
+   4) Make ordered card use vector<int> as an ordering
+   DONE 5) Allow viewing other player's info
+   6) Add info on cards
+   7) Add function to print out all information about game state
  
  */
 
@@ -28,6 +31,7 @@
 using namespace std;
 
 // TODO: Make more checks for formatting so that Jacob's errors can be caught more easily
+// TODO: Change if statement to case statement to speed things up if they are too slow
 int main() {
     srand(RANDOM_SEED);
     
@@ -82,7 +86,7 @@ int main() {
         }
         
         if (words[0] == "changegame") {
-            if (words.size() == 1) {
+            if (words.size() <= 1) {
                 cout << "ERROR: Must specify which game to change to" << endl;
                 continue;
             }
@@ -108,13 +112,13 @@ int main() {
         }
         
         if (words[0] == "changemode") {
-            if (words.size() == 1) {
+            if (words.size() <= 1) {
                 cout << "ERROR: Must specify what mode setting you would like to change" << endl;
                 continue;
             }
             
             if (words[1] == "debug") {
-                if (words.size() == 2) {
+                if (words.size() <= 2) {
                     debugMode = !debugMode;
                     cout << "Successfully toggled debug mode to " << debugMode << "!" << endl;
                     continue;
@@ -156,9 +160,10 @@ int main() {
         // TODO: Make a prettier formatting mode
         // TODO: Allow viewing of other people's hands in debug mode
         // TODO: Allow viewing info about other aspects of the game, like current treasure
+        // TODO: Make functions that return ALL information at once
         if (words[0] == "info") {
-            if (words.size() == 1) {
-                cout << "Please specify what type of info you would like" << endl;
+            if (words.size() <= 1) {
+                cout << "ERROR: Must specify some type of info to retrieve." << endl;
                 continue;
             }
             
@@ -168,45 +173,92 @@ int main() {
                 cout << games[currGame]->getBoardString() << endl;
                 continue;
             }
-            else if (words[1] == "play") {
-                cout << games[currGame]->getCurrInPlay()->getPileString() << endl;
+            else if (words[1] == "phase") {
+                cout << games[currGame]->curr_phase << endl;
                 continue;
             }
-            else if (words[1] == "hand") {
-                cout << games[currGame]->getCurrInHand()->getPileString() << endl;
-                continue;
-            }
-            else if (words[1] == "discard") {
-                if (debugMode) {
-                    cout << games[currGame]->getCurrInDiscard()->getPileString() << endl;
+            else if (words[1] == "player") {
+                if (words.size() <= 2) {
+                    cout << "ERROR: Must specify some type of player info to retrieve." << endl;
                     continue;
+                }
+                
+                // See if the player to view has been specified
+                PlayerState* player = nullptr;
+                if (words.size() <= 3) {
+                    player = games[currGame]->getCurrPlayerState();
                 }
                 else {
-                    cout << "ERROR: Looking through your discard pile requires debug mode to be on." << endl;
+                    player = games[currGame]->player_states[stoi(words[3])];
+                }
+                
+                // See if the player is requesting limited information
+                // TODO: Test for what limitedInfo should be in a smart manner
+                // i.e.- if debug mode is off and we are viewing the deck and limitedInfo is not specified,
+                // then automatically set limitedInfo to true
+                // TODO: Also return the top card of the discard in limitedInfo mode once I get that fixed up
+                bool limitedInfo = false;
+                if (words.size() >= 5) {
+                    if (words[4] == "true" || words[4] == "1") {
+                        limitedInfo = true;
+                    }
+                    else if (words[4] == "false" || words[4] == "1") {
+                        limitedInfo = false;
+                    }
+                    else {
+                        cout << "ERROR: limitedInfo setting must be 'true' or 'false'." << endl;
+                        continue;
+                    }
+                }
+                
+                if (words[2] == "play") {
+                    cout << player->cardsInPlay->getPileString() << endl;
                     continue;
                 }
-            }
-            else if (words[1] == "deck") { // TODO: Add a way to view the NUMBER of cards in a player's deck
-                if (debugMode) {
-                    cout << games[currGame]->getCurrInDeck()->getPileString() << endl;
+                else if (words[2] == "hand") {
+                    cout << player->cardsInHand->getPileString() << endl;
                     continue;
                 }
-                else {
-                    cout << "ERROR: Looking through your deck requires debug mode to be on." << endl;
+                else if (words[1] == "discard") {
+                    if (limitedInfo) {
+                        cout << player->cardsInDiscard->contents.size() << endl;
+                        continue;
+                    }
+                    else if (debugMode) {
+                        cout << player->cardsInDiscard->getPileString() << endl;
+                        continue;
+                    }
+                    else {
+                        cout << "ERROR: Looking through your discard pile requires debug mode to be on." << endl;
+                        continue;
+                    }
+                }
+                else if (words[1] == "deck") {
+                    if (limitedInfo) {
+                        cout << player->cardsInDeck->contents.size() << endl;
+                        continue;
+                    }
+                    else if (debugMode) {
+                        cout << player->cardsInDeck->getPileString() << endl;
+                        continue;
+                    }
+                    else {
+                        cout << "ERROR: Looking through your deck requires debug mode to be on." << endl;
+                        continue;
+                    }
+                }
+                else if (words[1] == "actions") {
+                    cout << player->num_actions << endl;
                     continue;
                 }
-            }
-            else if (words[1] == "actions") {
-                cout << games[currGame]->getCurrActions() << endl;
-                continue;
-            }
-            else if (words[1] == "treasure") {
-                cout << games[currGame]->getCurrTreasure() << endl;
-                continue;
-            }
-            else if (words[1] == "buys") {
-                cout << games[currGame]->getCurrBuys() << endl;
-                continue;
+                else if (words[1] == "treasure") {
+                    cout << player->num_treasure << endl;
+                    continue;
+                }
+                else if (words[1] == "buys") {
+                    cout << player->num_buys << endl;
+                    continue;
+                }
             }
             else {
                 cout << "ERROR: That's not a valid parameter to get information on!" << endl;
@@ -223,8 +275,10 @@ int main() {
         // Interacting functions
         ////////////////////////////////////////////////////////////////////////////////
         
+        // TODO: allow playing of other player's cards in debug mode
+        
         if (words[0] == "play") {
-            if (words.size() == 1) {
+            if (words.size() <= 1) {
                 cout << "ERROR: Must supply the id of a card to play." << endl;
                 continue;
             }
@@ -265,12 +319,24 @@ int main() {
         }
         
         if (words[0] == "buy") {
-            if (words.size() == 1) {
+            if (words.size() <= 1) {
                 cout << "ERROR: Need to specify which pile to buy from!" << endl;
                 continue;
             }
             
+            // Make sure we are in the buy phase
+            if (!debugMode && games[currGame]->curr_phase != "buy - buy cards") {
+                cout << "ERROR: Not in debug mode and attempting to buy cards in phase other than buy - buy cards phase." << endl;
+                continue;
+            }
+            
             // TODO: Test if second argument is indeed an int
+            int pileNumberToBuyFrom = stoi(words[1]);
+            if (pileNumberToBuyFrom < 0 || games[currGame]->board.size() <= pileNumberToBuyFrom) {
+                cout << "ERROR: That pile does not exist" << endl;
+                continue;
+            }
+            
             Pile* pileToBuyFrom = games[currGame]->board[stoi(words[1])];
             
             // Test if the pile is empty
@@ -293,6 +359,7 @@ int main() {
                 continue;
             }
             
+            // TODO: Don't subtract money and buys and such during debug mode
             games[currGame]->buyCard(cardToBuy);
             cout << "Successfully bought a " << cardToBuy.card->name << endl;
             continue;
@@ -316,7 +383,7 @@ int main() {
                 continue;
             }
             else if (phase == "buy - buy cards") {
-                games[currGame]->endTurn();
+                games[currGame]->nextTurn();
                 cout << "Successfully ended turn" << endl;
                 continue;
             }
