@@ -10,7 +10,7 @@
 #include "card.hpp"
 #include "states.hpp"
 
-void Pile::transferCard(OrderedCard cardToTransfer, double newOrder) {
+void Pile::transferCard(OrderedCard cardToTransfer, vector<int> newOrder) {
     // First, remove said card from its parent pile
     // Make sure its parent pile exists (otherwise we are adding this card from the void
     if (cardToTransfer.parent != nullptr) {
@@ -28,22 +28,22 @@ void Pile::transferCard(OrderedCard cardToTransfer, double newOrder) {
 }
 
 void Pile::transferCard(OrderedCard cardToTransfer) {
-    transferCard(cardToTransfer, contents.size() + 1);
+    transferCard(cardToTransfer, {getHighestOrder()[0] + 1});
 }
 
+// TODO: Make shuffling part faster and also avoid shuffling in case that withShuffling == false
+// TODO: Make numbers smaller for shuffled things (isn't really needed now unless you're playing things from deck)
 void Pile::transferTo(Pile* otherPile, bool withShuffling) {
-    vector<pair<double, OrderedCard>> cardsToTransfer;
+    set<pair<vector<int>, OrderedCard>> cardsToTransfer;
     for (auto it = contents.begin(); it != contents.end(); ++it) {
-        // Choose the size of the random range based on the discard pile size
-        // It doesn't really matter (the range could be [0,1] without a difference), but it "feels" better this way
-        double tempOrder = otherPile->getHighestOrder() + getRand(contents.size());
+        vector<int> tempOrder = {otherPile->getHighestOrder()[0] + 1, rand()};
         
-        cardsToTransfer.push_back(make_pair(tempOrder, *it));
+        cardsToTransfer.insert(make_pair(tempOrder, *it));
     }
     
-    for (int i = 0; i < cardsToTransfer.size(); ++i) {
-        if (withShuffling) otherPile->transferCard(get<1>(cardsToTransfer[i]), get<0>(cardsToTransfer[i]));
-        else otherPile->transferCard(get<1>(cardsToTransfer[i]));
+    for (auto it = cardsToTransfer.begin(); it != cardsToTransfer.end(); ++it) {
+        if (withShuffling) otherPile->transferCard(get<1>(*it), get<0>(*it));
+        else otherPile->transferCard(get<1>(*it));
     }
 }
 
@@ -53,7 +53,10 @@ string Pile::getPileString() {
     for (auto it = contents.begin(); it != contents.end(); ++it) {
         pileString += it->card->name;
         pileString += ":";
-        pileString += to_string(it->order);
+        for (int i = 0; i < it->order.size(); ++i) {
+            pileString += to_string(it->order[i]);
+            pileString += ".";
+        }
         pileString += ",";
     }
     

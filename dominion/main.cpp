@@ -66,7 +66,7 @@ int main() {
         ////////////////////////////////////////////////////////////////////////////////
         
         if (words[0] == "help") {
-            cout << "Just ask Kyle via facebook messenger since he's too lazy to type everything out right now.";
+            cout << "Just ask Kyle via facebook messenger since he's too lazy to type everything out right now." << endl;
             continue;
         }
         
@@ -219,7 +219,7 @@ int main() {
                     cout << player->cardsInHand->getPileString() << endl;
                     continue;
                 }
-                else if (words[1] == "discard") {
+                else if (words[2] == "discard") {
                     if (limitedInfo) {
                         cout << player->cardsInDiscard->contents.size() << endl;
                         continue;
@@ -233,7 +233,7 @@ int main() {
                         continue;
                     }
                 }
-                else if (words[1] == "deck") {
+                else if (words[2] == "deck") {
                     if (limitedInfo) {
                         cout << player->cardsInDeck->contents.size() << endl;
                         continue;
@@ -247,16 +247,20 @@ int main() {
                         continue;
                     }
                 }
-                else if (words[1] == "actions") {
+                else if (words[2] == "actions") {
                     cout << player->num_actions << endl;
                     continue;
                 }
-                else if (words[1] == "treasure") {
+                else if (words[2] == "treasure") {
                     cout << player->num_treasure << endl;
                     continue;
                 }
-                else if (words[1] == "buys") {
+                else if (words[2] == "buys") {
                     cout << player->num_buys << endl;
+                    continue;
+                }
+                else {
+                    cout << "ERROR: That's not a valid type of player information to get!" << endl;
                     continue;
                 }
             }
@@ -282,41 +286,56 @@ int main() {
                 cout << "ERROR: Must supply the id of a card to play." << endl;
                 continue;
             }
+            
+            // Now parse the input vector specifying what to play
+            vector<int> cardIndex;
+            string tempNumber = "";
+            for (int i = 0; i < words[0].size(); ++i) {
+                if (words[1][i] == '.') {
+                    // TODO: Check case that supplied value is not an int
+                    // Make sure this isn't the last decimal point
+                    if (tempNumber != "") cardIndex.push_back(stoi(tempNumber));
+                    tempNumber = "";
+                }
+                else {
+                    tempNumber += words[1][i];
+                }
+            }
+            
             // TODO: Check case that supplied value is not a double
-            else {
-                // TODO: Add a Pile member function to get cards with a given id
-                OrderedCard tempOrderedCard(nullptr, stod(words[1]), nullptr);
-                set<OrderedCard> hand = games[currGame]->getCurrInHand()->contents;
-                auto cardToPlay = hand.lower_bound(tempOrderedCard);
-                
-                if (cardToPlay == hand.end()) {
-                    cout << "ERROR: The selected card does not exists; please input a value less than or equal to a card's ID to play it." << endl;
-                    continue;
-                }
-                
-                // Get the types of the given card
-                set<string> types = cardToPlay->card->type;
-                
-                // Make sure the type of the card matches the phase
-                // Also check that the player has actions left if needed
-                if (!debugMode && games[currGame]->curr_phase == "action" && types.find("action") == types.end()) {
-                    cout << "ERROR: Debug mode is off and you are attempting to play a non-action card in the action phase!" << endl;
-                    continue;
-                }
-                else if (!debugMode && games[currGame]->curr_phase == "action" && games[currGame]->getCurrActions() == 0) {
-                    cout << "ERROR: Debug mode is off and you are attempting to play an action card without an action!" << endl;
-                    continue;
-                }
-                else if (!debugMode && games[currGame]->curr_phase == "buy - play treasures" && types.find("treasure") == types.end()) {
-                    cout << "ERROR: Debug mode is off and you are attempting to play a non-treasure card in the beginning of the buy phase!" << endl;
-                    continue;
-                }
-                
-                games[currGame]->playCard(*cardToPlay);
-                cout << "Successfully played a " << cardToPlay->card->name << endl;
+            // TODO: Add a Pile member function to get cards with a given id
+            OrderedCard tempOrderedCard(nullptr, cardIndex, nullptr);
+            set<OrderedCard> hand = games[currGame]->getCurrInHand()->contents;
+            auto cardToPlay = hand.lower_bound(tempOrderedCard);
+            
+            if (cardToPlay == hand.end()) {
+                cout << "ERROR: The selected card does not exists; please input a value less than or equal to a card's ID to play it." << endl;
                 continue;
             }
+            
+            // Get the types of the given card
+            set<string> types = cardToPlay->card->type;
+            
+            // Make sure the type of the card matches the phase
+            // Also check that the player has actions left if needed
+            if (!debugMode && games[currGame]->curr_phase == "action" && types.find("action") == types.end()) {
+                cout << "ERROR: Debug mode is off and you are attempting to play a non-action card in the action phase!" << endl;
+                continue;
+            }
+            else if (!debugMode && games[currGame]->curr_phase == "action" && games[currGame]->getCurrActions() == 0) {
+                cout << "ERROR: Debug mode is off and you are attempting to play an action card without an action!" << endl;
+                continue;
+            }
+            else if (!debugMode && games[currGame]->curr_phase == "buy - play treasures" && types.find("treasure") == types.end()) {
+                cout << "ERROR: Debug mode is off and you are attempting to play a non-treasure card in the beginning of the buy phase!" << endl;
+                continue;
+            }
+            
+            games[currGame]->playCard(*cardToPlay);
+            cout << "Successfully played a " << cardToPlay->card->name << endl;
+            continue;
         }
+        
         
         if (words[0] == "buy") {
             if (words.size() <= 1) {

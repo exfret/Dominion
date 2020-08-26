@@ -20,7 +20,7 @@ struct Card;
 struct Pile;
 
 struct OrderedCard {
-    OrderedCard(Card* init_card, double init_order, Pile* init_parent) : card(init_card), order(init_order), parent(init_parent) {}
+    OrderedCard(Card* init_card, vector<int> init_order, Pile* init_parent) : card(init_card), order(init_order), parent(init_parent) {}
     
     // May need to add an assignment operator to stop from tracking the same card around
     bool operator<(const OrderedCard& other) const {
@@ -28,8 +28,9 @@ struct OrderedCard {
     }
     
     Card* card;
-    // TODO: Change this to something that makes cards easier to select (a string?)
-    double order;
+    // IN PROGRESS: Change this to something that makes cards easier to select (a string?)
+    // TODO: Make some functions to "balance" the order vectors better if needed
+    vector<int> order;
     Pile* parent;
 };
 
@@ -38,19 +39,19 @@ struct Pile {
     Pile(vector<Card*> cards) {
         for (int i = 0; i < cards.size(); ++i) {
             Card* tempCard = cards[i];
-            contents.insert(OrderedCard(tempCard, i, this));
+            contents.insert(OrderedCard(tempCard, {i}, this));
         }
     }
     
     set<OrderedCard> contents;
     
-    double getHighestOrder() {
-        if (contents.empty()) return 0;
+    vector<int> getHighestOrder() {
+        if (contents.empty()) return {0};
         else return contents.rbegin()->order;
     }
     
     // If no order is specified, put the card at the highest order position
-    void transferCard(OrderedCard cardToTransfer, double newOrder);
+    void transferCard(OrderedCard cardToTransfer, vector<int> newOrder);
     void transferCard(OrderedCard cardToTransfer);
     void transferTo(Pile* otherPile, bool withShuffling = false);
     
