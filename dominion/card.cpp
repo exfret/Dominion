@@ -34,7 +34,7 @@ void Gold::onPlay(BoardState* board_state) {
 }
 
 void Curse::onGameEnd(BoardState* board_state) {
-    
+    board_state->addVictoryPoints(-1);
 }
 
 void Village::onPlay(BoardState* board_state) {
