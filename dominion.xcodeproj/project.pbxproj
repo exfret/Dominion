@@ -11,6 +11,7 @@
 		4B83C5FD24EDF1EB00EA8D12 /* card.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B83C5FB24EDF1EB00EA8D12 /* card.cpp */; };
 		4B83C60024F0143500EA8D12 /* states.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B83C5FE24F0143500EA8D12 /* states.cpp */; };
 		4B83C60324F3F4E600EA8D12 /* utility.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B83C60124F3F4E600EA8D12 /* utility.cpp */; };
+		4B83C60624F7E92600EA8D12 /* aihelper.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B83C60424F7E92600EA8D12 /* aihelper.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -34,6 +35,8 @@
 		4B83C5FF24F0143500EA8D12 /* states.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = states.hpp; sourceTree = "<group>"; };
 		4B83C60124F3F4E600EA8D12 /* utility.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = utility.cpp; sourceTree = "<group>"; };
 		4B83C60224F3F4E600EA8D12 /* utility.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = utility.hpp; sourceTree = "<group>"; };
+		4B83C60424F7E92600EA8D12 /* aihelper.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = aihelper.cpp; sourceTree = "<group>"; };
+		4B83C60524F7E92600EA8D12 /* aihelper.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = aihelper.hpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -67,6 +70,8 @@
 			isa = PBXGroup;
 			children = (
 				4B83C5F424ED874F00EA8D12 /* main.cpp */,
+				4B83C60424F7E92600EA8D12 /* aihelper.cpp */,
+				4B83C60524F7E92600EA8D12 /* aihelper.hpp */,
 				4B83C5FB24EDF1EB00EA8D12 /* card.cpp */,
 				4B83C5FC24EDF1EB00EA8D12 /* card.hpp */,
 				4B83C5FE24F0143500EA8D12 /* states.cpp */,
@@ -138,6 +143,7 @@
 				4B83C5F524ED874F00EA8D12 /* main.cpp in Sources */,
 				4B83C60024F0143500EA8D12 /* states.cpp in Sources */,
 				4B83C5FD24EDF1EB00EA8D12 /* card.cpp in Sources */,
+				4B83C60624F7E92600EA8D12 /* aihelper.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

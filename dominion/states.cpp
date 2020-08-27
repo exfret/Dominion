@@ -99,6 +99,43 @@ bool PlayerState::drawSingleCard() {
     return true;
 }
 
+string PlayerState::getStateString(bool isCurrPlayer) {
+    string stateString;
+    
+    if (isCurrPlayer) {
+        stateString += cardsInPlay->getPileString();
+        stateString += ";";
+        stateString += cardsInHand->getPileString();
+        stateString += ";";
+    }
+    else {
+        stateString += to_string(cardsInPlay->contents.size());
+        stateString += ";";
+        stateString += to_string(cardsInHand->contents.size());
+        stateString += ";";
+    }
+    
+    stateString += to_string(cardsInDiscard->contents.size());
+    stateString += ";";
+    stateString += to_string(cardsInDeck->contents.size());
+    stateString += ";";
+    
+    stateString += to_string(num_actions);
+    stateString += ",";
+    stateString += to_string(num_treasure);
+    stateString += ",";
+    stateString += to_string(num_buys);
+    stateString += ",";
+    stateString += to_string(num_villagers);
+    stateString += ",";
+    stateString += to_string(num_coffers);
+    stateString += ",";
+    stateString += to_string(num_victory_points);
+    stateString += ",";
+    
+    return stateString;
+}
+
 // TODO: Draw all cards at the same time and then resolve onDraw effects in order that player chooses
 int PlayerState::drawCards(int numCards) {
     int numCardsDrawn = 0;
@@ -234,6 +271,10 @@ void BoardState::gainCard(OrderedCard cardToGain) {
     
     // Now activate the card's onGain effect (if it has any)
     cardToGain.card->onGain(this);
+}
+
+bool BoardState::canBuyCard(OrderedCard cardToBuy) {
+    return getCurrTreasure() >= cardToBuy.card->cost && getCurrBuys() >= 1;
 }
 
 void BoardState::buyCard(OrderedCard cardToBuy) {

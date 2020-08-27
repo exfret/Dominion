@@ -17,6 +17,7 @@ using namespace std;
 struct Card;
 
 // This needs to be forward declared for OrderedCard to understand what a pile is
+// (So that OrderedCard can have a parent pile pointer
 struct Pile;
 
 struct OrderedCard {
@@ -71,6 +72,7 @@ struct PlayerState {
         drawCards(5);
     }
     
+    // TODO: Add special sorting mechanisms for cardsInPlay and cardsInHand to find specific cards faster
     Pile* cardsInPlay;
     Pile* cardsInHand;
     // Higher order means higher up in discard pile
@@ -89,6 +91,11 @@ struct PlayerState {
     void reshuffle();
     bool drawSingleCard();
     int drawCards(int numCards);
+    
+    ////////////////////////////////////////////////////////////////////////////////
+    // Interface functions
+    ////////////////////////////////////////////////////////////////////////////////
+    string getStateString(bool isCurrPlayer);
 };
 
 struct BoardState {
@@ -148,6 +155,7 @@ struct BoardState {
     
     void playCard(OrderedCard cardToPlay);
     void gainCard(OrderedCard cardToGain);
+    bool canBuyCard(OrderedCard cardToBuy);
     void buyCard(OrderedCard cardToBuy);
     
     // Resets some player state values for the next turn

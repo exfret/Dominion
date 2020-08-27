@@ -20,12 +20,20 @@
    DONE 5) Allow viewing other player's info
    6) Add info on cards
    7) Add function to print out all information about game state
+   8) Add a function for possible game choices
+   9) Make some basic functionality for playing turns for the AI
+     - Basically, handhold some part of the decision process for it
+   10) Make a log
+   11) Create multi-action capability in a single command so that there's less I/O needed
+ 
+ IDEA: Split up AI into two AI's - a strategic one for buy phase and a tactical one for action phase?
  
  */
 
 #include <iostream>
 #include <string>
 #include <vector>
+#include "aihelper.hpp"
 #include "card.hpp"
 #include "states.hpp"
 using namespace std;
@@ -167,10 +175,36 @@ int main() {
                 continue;
             }
             
-            // Returns list of board piles
-            // Piles are separated by commas, and cards inside piles are separated by commas
-            if (words[1] == "board") {
+            if (words[1] == "all") { // UNFINISHED
+                // TODO: Wrap all this up in the board_states class
+                cout << games[currGame]->getBoardString() << "|";
+                cout << games[currGame]->curr_phase << "|";
+                cout << games[currGame]->curr_player << "|";
+                vector<PlayerState*> players = games[currGame]->player_states;
+                for (int i = 0; i < players.size(); ++i) {
+                    if (i == games[currGame]->curr_player) {
+                        cout << players[i]->getStateString(true) << "|";
+                    }
+                    else {
+                        cout << players[i]->getStateString(false) << "|";
+                    }
+                }
+                cout << endl;
+                continue;
+            }
+            else if (words[1] == "board") {
+                // Returns list of board piles
+                // Piles are separated by commas, and cards inside piles are separated by commas
                 cout << games[currGame]->getBoardString() << endl;
+                continue;
+            }
+            else if (words[1] == "choices") {
+                set<pair<double, string>> choices = getWeightedChoices(games[currGame]);
+                
+                for (auto it = choices.begin(); it != choices.end(); ++it) {
+                    cout << get<0>(*it) << ":" << get<1>(*it) << "|";
+                }
+                cout << endl;
                 continue;
             }
             else if (words[1] == "phase") {
@@ -302,7 +336,6 @@ int main() {
                 }
             }
             
-            // TODO: Check case that supplied value is not a double
             // TODO: Add a Pile member function to get cards with a given id
             OrderedCard tempOrderedCard(nullptr, cardIndex, nullptr);
             set<OrderedCard> hand = games[currGame]->getCurrInHand()->contents;
