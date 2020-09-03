@@ -10,11 +10,15 @@
 #define states_hpp
 
 #include <set>
+#include <stack>
+#include <string>
+#include <unordered_map>
 #include <vector>
 #include "utility.hpp"
 using namespace std;
 
 struct Card;
+struct Event;
 
 // This needs to be forward declared for OrderedCard to understand what a pile is
 // (So that OrderedCard can have a parent pile pointer
@@ -98,6 +102,7 @@ struct PlayerState {
     string getStateString(bool isCurrPlayer);
 };
 
+// TODO: Change the name of this to GameState?
 struct BoardState {
     BoardState(int numPlayers = 2) : curr_player(0), curr_phase("start of game") {
         for (int i = 0; i < numPlayers; ++i) {
@@ -111,6 +116,11 @@ struct BoardState {
     vector<PlayerState*> player_states;
     // For the board, higher order means higher up in the pile
     vector<Pile*> board;
+    // Should it be an unordered set? I might need the ordering in the future?..
+    unordered_map<string, set<Event*>> events;
+    stack<Event*> triggeredEvents;
+    // TODO: Add currCommand to member variables so that I don't have to keep passing it around
+    // TODO: Add and event ID system so I don't have to print out pointers
     
     void initializeBoard();
     
@@ -153,6 +163,12 @@ struct BoardState {
     
     // TODO: addCoffers and addVillagers
     
+    // Event methods
+    void addEvent(Event* eventToAdd);
+    void removeEvent(Event* eventToRemove);
+    void triggerEvents(string trigger, vector<string> currCommand);
+    
+    // Game interaction methods
     void playCard(OrderedCard cardToPlay);
     void gainCard(OrderedCard cardToGain);
     bool canBuyCard(OrderedCard cardToBuy);

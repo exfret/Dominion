@@ -15,23 +15,7 @@
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "69"
             endingLineNumber = "69"
-            landmarkName = "PlayerState::reshuffle()"
-            landmarkType = "7">
-         </BreakpointContent>
-      </BreakpointProxy>
-      <BreakpointProxy
-         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
-         <BreakpointContent
-            shouldBeEnabled = "No"
-            ignoreCount = "0"
-            continueAfterRunningActions = "No"
-            filePath = "dominion/card.cpp"
-            timestampString = "620158046.193658"
-            startingColumnNumber = "9223372036854775807"
-            endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "25"
-            endingLineNumber = "25"
-            landmarkName = "Copper::onPlay(BoardState* board_state)"
+            landmarkName = "Pile::getPileString()"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>

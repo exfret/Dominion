@@ -37,6 +37,10 @@ void Curse::onGameEnd(BoardState* board_state) {
     board_state->addVictoryPoints(-1);
 }
 
+void Cellar::onPlay(BoardState* board_state) {
+    
+}
+
 void Village::onPlay(BoardState* board_state) {
     board_state->drawCards(1);
     board_state->addActions(2);

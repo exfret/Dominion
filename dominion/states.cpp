@@ -8,7 +8,12 @@
 
 #include <cstdlib>
 #include "card.hpp"
+#include "event.hpp"
 #include "states.hpp"
+
+////////////////////////////////////////////////////////////////////////////////
+// Pile - interaction functions
+////////////////////////////////////////////////////////////////////////////////
 
 void Pile::transferCard(OrderedCard cardToTransfer, vector<int> newOrder) {
     // First, remove said card from its parent pile
@@ -47,6 +52,10 @@ void Pile::transferTo(Pile* otherPile, bool withShuffling) {
     }
 }
 
+////////////////////////////////////////////////////////////////////////////////
+// Pile - interface functions
+////////////////////////////////////////////////////////////////////////////////
+
 string Pile::getPileString() {
     string pileString = "";
     
@@ -62,6 +71,10 @@ string Pile::getPileString() {
     
     return pileString;
 }
+
+////////////////////////////////////////////////////////////////////////////////
+// PlayerState - interaction functions
+////////////////////////////////////////////////////////////////////////////////
 
 void PlayerState::reshuffle() {
     Pile* discard = cardsInDiscard;
@@ -98,6 +111,19 @@ bool PlayerState::drawSingleCard() {
     
     return true;
 }
+
+// TODO: Draw all cards at the same time and then resolve onDraw effects in order that player chooses
+int PlayerState::drawCards(int numCards) {
+    int numCardsDrawn = 0;
+    for (int i = 0; i < numCards; ++i) {
+        if (drawSingleCard()) ++numCardsDrawn;
+    }
+    return numCardsDrawn;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+// PlayerState - interface functions
+////////////////////////////////////////////////////////////////////////////////
 
 string PlayerState::getStateString(bool isCurrPlayer) {
     string stateString;
@@ -136,14 +162,9 @@ string PlayerState::getStateString(bool isCurrPlayer) {
     return stateString;
 }
 
-// TODO: Draw all cards at the same time and then resolve onDraw effects in order that player chooses
-int PlayerState::drawCards(int numCards) {
-    int numCardsDrawn = 0;
-    for (int i = 0; i < numCards; ++i) {
-        if (drawSingleCard()) ++numCardsDrawn;
-    }
-    return numCardsDrawn;
-}
+////////////////////////////////////////////////////////////////////////////////
+// BoardState - initialization functions
+////////////////////////////////////////////////////////////////////////////////
 
 void BoardState::initializeBoard() {
     vector<Card*> tempCardHolder;
@@ -197,6 +218,10 @@ void BoardState::initializeBoard() {
     board.push_back(new Pile(tempCardHolder));
     tempCardHolder.clear();
 }
+
+////////////////////////////////////////////////////////////////////////////////
+// BoardState - helper functions
+////////////////////////////////////////////////////////////////////////////////
 
 PlayerState* BoardState::getCurrPlayerState() {
     return player_states[curr_player];
@@ -253,6 +278,88 @@ void BoardState::setBuys(int newBuyAmount) {
 void BoardState::addVictoryPoints(int numVictoryPointsToAdd) {
     getCurrPlayerState()->num_victory_points += numVictoryPointsToAdd;
 }
+
+////////////////////////////////////////////////////////////////////////////////
+// BoardState - event functions
+////////////////////////////////////////////////////////////////////////////////
+
+void BoardState::addEvent(Event* eventToAdd) {
+    set<string> triggers = eventToAdd->triggerBuckets;
+    
+    for (auto it = triggers.begin(); it != triggers.end(); ++it) {
+        events[*it].insert(eventToAdd);
+    }
+}
+
+void BoardState::removeEvent(Event* eventToRemove) {
+    set<string> triggers = eventToRemove->triggerBuckets;
+    
+    for (auto it = triggers.begin(); it != triggers.end(); ++it) {
+        events[*it].erase(eventToRemove);
+    }
+}
+
+void BoardState::triggerEvents(string trigger, vector<string> currCommand) {
+    set<Event*> eventCandidates = events[trigger];
+    
+    vector<Event*> eventsTriggered;
+    for (auto it = eventCandidates.begin(); it != eventCandidates.end(); ++it) {
+        if ((*it)->checkIfTriggered(this, currCommand)) {
+            eventsTriggered.push_back(*it);
+        }
+    }
+    
+    if (eventsTriggered.size() == 1) {
+        triggeredEvents.push(eventsTriggered[0]);
+    }
+    else if (eventsTriggered.size() >= 2) {
+        Event* resolveMultiEvents = new Event;
+        resolveMultiEvents->eventTypeName = "resolve_multi_event";
+        for (int i = 0; i < eventsTriggered.size(); ++i) {
+            resolveMultiEvents->data.push_back(eventsTriggered[i]);
+        }
+        resolveMultiEvents->onCall = [=] (BoardState* board_state, vector<string> command) -> string {
+            if (command.size() == 1) {
+                return "ERROR: Must supply a valid index of an event to resolve first.";
+            }
+            
+            // TODO: Make sure command[1] is an int
+            // TODO: Make sure command[1] is in the proper range
+            int eventIndexToResolve = stoi(command[1]);
+            vector<void*>& listOfEvents = resolveMultiEvents->data;
+            
+            // Remove the event that's going to be resolved
+            swap(listOfEvents[eventIndexToResolve], listOfEvents[listOfEvents.size() - 1]);
+            listOfEvents.pop_back();
+            
+            // Now test if there's just one more event left and if so, pop this and add that event
+            board_state->triggeredEvents.pop();
+            board_state->triggeredEvents.push(static_cast<Event*>(listOfEvents[0]));
+            
+            // Now add the triggered event on top
+            board_state->triggeredEvents.push(static_cast<Event*>(listOfEvents[eventIndexToResolve]));
+            
+            return "Successfully resolved multi-event.";
+        };
+        resolveMultiEvents->getEventString = [=] (BoardState* board_state) -> string {
+            string eventString = "";
+            
+            eventString += "Event ID: " + to_string((unsigned long)resolveMultiEvents) + "\n";
+            
+            eventString += "Event of type multi-event with the following subevents:\n";
+            for (int i = 0; i < resolveMultiEvents->data.size(); ++i) {
+                eventString += "\t" + static_cast<Event*>(resolveMultiEvents->data[i])->getEventString(board_state) + "\n";
+            }
+            
+            return eventString;
+        };
+        triggeredEvents.push(resolveMultiEvents);
+    }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+// BoardState - interaction functions
+////////////////////////////////////////////////////////////////////////////////
 
 void BoardState::playCard(OrderedCard cardToPlay) {
     // First transfer the card into the play area
@@ -322,6 +429,10 @@ void BoardState::nextTurn() {
     endTurn();
     startTurn();
 }
+
+////////////////////////////////////////////////////////////////////////////////
+// BoardState - interface functions
+////////////////////////////////////////////////////////////////////////////////
 
 string BoardState::getBoardString() {
     string boardString = "";

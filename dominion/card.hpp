@@ -79,6 +79,12 @@ struct Curse : Card {
     virtual void onGameEnd(BoardState* board_state);
 };
 
+struct Cellar : Card {
+    Cellar() : Card("cellar", 2, {"action"}) {}
+    
+    virtual void onPlay(BoardState* board_state);
+};
+
 struct Laboratory : Card {
     Laboratory() : Card("laboratory", 5, {"action"}) {}
     
